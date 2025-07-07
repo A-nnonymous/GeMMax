@@ -29,6 +29,7 @@ Makefile
 third_party/
 *~
 bazel-*
+codestyle/
 
 
 build_*
