@@ -22,7 +22,6 @@ build_doc/
 .pydevproject
 .settings/
 CMakeSettings.json
-Makefile
 .test_env/
 .cache/
 .env
