@@ -5,16 +5,25 @@ DRY_RUN ?= true
 PYTHON := ${ENV_DIR}/bin/python
 
 ifeq ($(DRY_RUN),true)
-    RUN := echo "Would run:"
+    RUN := echo "-- [DRY RUN]:"
 else
     RUN := @
 endif
 
 LOG_FILE = $(LOG_DIR)/$(1)_gpu$(2).log
 
-setup:
-	$(RUN) $(PYTHON) setup.py install && cd third_party/deep_gemm && $(PYTHON) setup.py install
+#---------------------- Setup ----------------------
+setup_gemmax:
+	@${RUN} $(PYTHON) setup.py install
 
+setup_deepgemm:
+	@${RUN} $(PYTHON) third_party/deep_gemm/setup.py install
+
+setup:
+	make setup_gemmax
+	make setup_deepgemm
+
+#---------------------- Benchmark ----------------------
 $(LOG_DIR):
 	$(RUN) mkdir -p $(LOG_DIR)
 
@@ -41,5 +50,6 @@ run_all_benchmarks: $(LOG_DIR)
 	make run_gemmax_benchmark NUM_GPUS=4
 	wait
 
+# --------------------- Cleaning ----------------------
 clean_logs:
 	$(RUN) rm -rf $(LOG_DIR)
