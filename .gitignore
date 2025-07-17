@@ -30,6 +30,8 @@ third_party/
 bazel-*
 codestyle/
 
+*.egg-info
+*.so
 
 build_*
 # clion workspace.

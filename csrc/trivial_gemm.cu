@@ -23,8 +23,8 @@ void dispatch_trivial_gemm(const paddle::Tensor& lhs,
   return;
 }
 
-std::vector<paddle::Tensor> gemm_nt(const paddle::Tensor& lhs,
-                                    const paddle::Tensor& rhs) {
+std::vector<paddle::Tensor> trivial_gemm(const paddle::Tensor& lhs,
+                                         const paddle::Tensor& rhs) {
   const int m = lhs.shape()[0];  // lhs [m, k]
   const int k = lhs.shape()[1];
   const int n = rhs.shape()[1];  // rhs [k, n]

@@ -1,8 +1,7 @@
-[submodule "third_party/deep_gemm"]
-	path = third_party/deep_gemm
-	url = https://github.com/deepseek-ai/DeepGEMM.git
-	branch = main
 [submodule "third_party/cutlass"]
 	path = third_party/cutlass
 	url = https://github.com/NVIDIA/cutlass.git
 	branch = main
+[submodule "third_party/DeepGEMM_annotation"]
+	path = third_party/DeepGEMM_annotation
+	url = https://github.com/A-nnonymous/DeepGEMM_annotation.git
