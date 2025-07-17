@@ -27,7 +27,6 @@ from deep_gemm import (
     ceil_div,
     get_col_major_tma_aligned_tensor,
 )
-from deep_gemm.jit_kernels.utils import get_m_alignment_for_contiguous_layout
 
 m_list = [128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 n_list = [2048, 4096, 7168, 8192, 12288, 16384]
@@ -88,7 +87,7 @@ def construct_contiguous_grouped(
     torch.Tensor,
     torch.Tensor,
 ]:
-    alignment = get_m_alignment_for_contiguous_layout()
+    alignment = 128
     # group_ms = [int(expected_m_per_group * random.uniform(0.7, 1.3)) for _ in range(num_groups)]
     group_ms = [int(expected_m_per_group * 1) for _ in range(num_groups)]
     m = sum([ceil_div(x, alignment) * alignment for x in group_ms])

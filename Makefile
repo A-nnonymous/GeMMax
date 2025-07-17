@@ -54,6 +54,10 @@ clean_all:
 	make clean_whl
 	make clean_logs
 
+clean_init:
+	make clean_all
+	make setup
+
 #---------------------- Benchmark ----------------------
 $(LOG_DIR):
 	$(RUN) mkdir -p $(LOG_DIR)
