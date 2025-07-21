@@ -105,46 +105,6 @@ def plot_3d_surface(ax, K, N, Z, title, metric_label, cmap="coolwarm"):
     return surf
 
 
-'''
-def plot_trivial_gemm(csv_path, output_dir="../results/deep_gemm/trivial"):
-    """绘制trivial GEMM性能图表"""
-    df = load_and_prepare_data(csv_path, "trivial")
-
-    import os
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    metrics_info = {
-        "time_us": "Execution Time (μs)",
-        "throughput_TFLOPS": "Throughput (TFLOPS)",
-        "bandwidth_GBs": "Bandwidth (GB/s)",
-    }
-
-    for m in df["m"].unique():
-        m_data = df[df["m"] == m]
-
-        if len(m_data) < 4:
-            print(f"Skipping m={m}: insufficient data points")
-            continue
-
-        fig = plt.figure(figsize=(18, 6))
-        fig.suptitle(f"Performance Metrics for m={m}", fontsize=16)
-
-        for i, (metric, title) in enumerate(metrics_info.items()):
-            ax = fig.add_subplot(1, 3, i + 1, projection="3d")
-            K, N, Z = interpolate_metric(m_data, metric)
-            surf = plot_3d_surface(ax, K, N, Z, title, title)
-            if surf:
-                fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
-
-        plt.tight_layout()
-        output_path = f"{output_dir}/contour_plot_m_{m}.png"
-        plt.savefig(output_path, dpi=300, bbox_inches="tight")
-        plt.close()
-        print(f"Saved: {output_path}")
-'''
-
-
 def plot_trivial_gemm(
     csv_path, output_dir="../results/deep_gemm/trivial", layout="auto"
 ):
