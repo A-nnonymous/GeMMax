@@ -1,3 +1,17 @@
+# Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -91,6 +105,7 @@ def plot_3d_surface(ax, K, N, Z, title, metric_label, cmap="coolwarm"):
     return surf
 
 
+'''
 def plot_trivial_gemm(csv_path, output_dir="../results/deep_gemm/trivial"):
     """绘制trivial GEMM性能图表"""
     df = load_and_prepare_data(csv_path, "trivial")
@@ -127,6 +142,83 @@ def plot_trivial_gemm(csv_path, output_dir="../results/deep_gemm/trivial"):
         plt.savefig(output_path, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Saved: {output_path}")
+'''
+
+
+def plot_trivial_gemm(
+    csv_path, output_dir="../results/deep_gemm/trivial", layout="auto"
+):
+    """绘制trivial GEMM性能图表 - 采用grouped风格"""
+    df = load_and_prepare_data(csv_path, "trivial")
+
+    import os
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    metrics_info = {
+        "time_us": "Time (μs)",
+        "throughput_TFLOPS": "Throughput (TFLOPS)",
+        "bandwidth_GBs": "Bandwidth (GB/s)",
+    }
+
+    m_list = sorted(df["m"].unique())
+    n_m = len(m_list)
+
+    if n_m == 0:
+        return
+
+    if isinstance(layout, tuple):
+        rows, cols = layout
+    else:
+        rows, cols = determine_layout(n_m, len(metrics_info), layout)
+
+    fig_width = min(6 * cols, 30)
+    fig_height = min(5 * rows, 25)
+
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    fig.suptitle(f"Trivial GEMM Performance Metrics ({n_m} m values)", fontsize=16)
+
+    plot_idx = 1
+    for i, m in enumerate(m_list):
+        m_data = df[df["m"] == m]
+
+        for j, (metric, title) in enumerate(metrics_info.items()):
+            ax = fig.add_subplot(rows, cols, plot_idx, projection="3d")
+
+            if len(m_data) < 4:
+                ax.text(
+                    0.5,
+                    0.5,
+                    0.5,
+                    f"Insufficient data\nfor m={m}",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                    fontsize=8,
+                )
+                ax.set_title(f"m={m}: {title}", fontsize=9)
+            else:
+                K, N, Z = interpolate_metric(m_data, metric)
+                surf = plot_3d_surface(ax, K, N, Z, f"m={m}: {title}", title)
+
+                if surf:
+                    cbar = fig.colorbar(surf, ax=ax, shrink=0.4, aspect=5, pad=0.1)
+                    cbar.ax.tick_params(labelsize=6)
+
+            # ax.view_init(elev=20, azim=45)
+            ax.tick_params(axis="both", which="major", labelsize=6)
+            plot_idx += 1
+
+    while plot_idx <= rows * cols:
+        ax = fig.add_subplot(rows, cols, plot_idx)
+        ax.axis("off")
+        plot_idx += 1
+
+    plt.tight_layout()
+    output_path = f"{output_dir}/contour_plot_trivial.png"
+    plt.savefig(output_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {output_path} (layout: {rows}x{cols})")
 
 
 def plot_grouped_gemm(
@@ -215,24 +307,9 @@ def plot_grouped_gemm(
 
 def determine_layout(n_groups, n_metrics, mode="auto"):
     """智能确定子图布局"""
-    total_plots = n_groups * n_metrics
 
-    if mode == "compact":
-        cols = n_metrics
-        rows = n_groups
-    elif mode == "square":
-        cols = int(np.ceil(np.sqrt(total_plots)))
-        rows = int(np.ceil(total_plots / cols))
-    else:  # auto
-        if n_groups <= 4:
-            cols = n_metrics
-            rows = n_groups
-        elif n_groups <= 8:
-            cols = n_metrics * 2
-            rows = int(np.ceil(n_groups / 2))
-        else:
-            cols = int(np.ceil(np.sqrt(total_plots)))
-            rows = int(np.ceil(total_plots / cols))
+    cols = n_metrics
+    rows = n_groups
 
     return rows, cols
 
@@ -384,5 +461,6 @@ def plot_comparison(
         plt.savefig(output_path, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Saved: {output_path} (layout: {rows}x{cols})")
+
 
 plot_trivial_gemm("../../output_data/deep_gemm/gemm_results.csv")
