@@ -91,7 +91,7 @@ def plot_3d_surface(ax, K, N, Z, title, metric_label, cmap="coolwarm"):
     return surf
 
 
-def plot_trivial_gemm(csv_path, output_dir="./results/deep_gemm/trivial"):
+def plot_trivial_gemm(csv_path, output_dir="../results/deep_gemm/trivial"):
     """绘制trivial GEMM性能图表"""
     df = load_and_prepare_data(csv_path, "trivial")
 
@@ -130,7 +130,7 @@ def plot_trivial_gemm(csv_path, output_dir="./results/deep_gemm/trivial"):
 
 
 def plot_grouped_gemm(
-    csv_path, output_dir="./results/deep_gemm/grouped", layout="auto"
+    csv_path, output_dir="../results/deep_gemm/grouped", layout="auto"
 ):
     """绘制grouped GEMM性能图表 - 灵活布局"""
     df = load_and_prepare_data(csv_path, "grouped")
@@ -384,3 +384,5 @@ def plot_comparison(
         plt.savefig(output_path, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Saved: {output_path} (layout: {rows}x{cols})")
+
+plot_trivial_gemm("../../output_data/deep_gemm/gemm_results.csv")
