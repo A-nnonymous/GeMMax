@@ -15,6 +15,9 @@ build_doc/
 *.pyc
 *.log
 *.png
+*.csv
+*.nsys-rep
+*.ncu-rep
 
 .vscode
 .idea

@@ -4,6 +4,8 @@ LOG_DIR := logs
 DRY_RUN ?= false
 PYTHON := ${ENV_DIR}/bin/python
 DEEPGEMM_DIR := third_party/DeepGEMM_annotation
+SAMPLE_GPUID := 0
+SAMPLE_INTERVAL_MS := 50
 .SILENT:
 
 ifeq ($(DRY_RUN),true)
@@ -84,6 +86,20 @@ run_all_benchmarks: $(LOG_DIR)
 	make run_deepgemm_benchmark NUM_GPUS=4 & \
 	make run_gemmax_benchmark NUM_GPUS=4
 	wait
+
+run_stability_benchmark:
+
+nvmonitor:
+	nvidia-smi -i ${SAMPLE_GPUID} --format=csv,nounits -lms ${SAMPLE_INTERVAL_MS} \
+	--query-gpu=utilization.gpu,memory.total,memory.used,memory.free,\
+	pstate,power.limit,power.draw.instant,\
+	clocks_throttle_reasons.hw_thermal_slowdown,\
+	clocks_throttle_reasons.hw_power_brake_slowdown,\
+	clocks_throttle_reasons.sw_thermal_slowdown,\
+	clocks_throttle_reasons.sync_boost,\
+	temperature.gpu.tlimit,temperature.gpu,temperature.memory,\
+	clocks.current.graphics,clocks.current.sm,clocks.current.video,clocks.current.memory \
+	| tee nvsmi_query.csv
 
 # -------------------- Unit tests -------------------
 run_deepgemm_unittest:
