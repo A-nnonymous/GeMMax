@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "./include/fp8_gemm.cuh"
 #include <cuda.h>          // NOLINT
 #include <cuda_runtime.h>  // NOLINT
 #include <functional>
@@ -19,49 +20,23 @@
 #include <vector>
 #include "paddle/extension.h"
 
-void dispatch_trivial_gemm(const paddle::Tensor& lhs,
-                           const paddle::Tensor& lhs_scale,
-                           const paddle::Tensor& rhs,
-                           const paddle::Tensor& rhs_scale,
-                           const bool is_lhs_1d_scaled,
-                           const bool is_rhs_1d_scaled,
-                           paddle::Tensor& out  // NOLINT
+void dispatch_fp8_gemm(const paddle::Tensor& lhs,
+                       const paddle::Tensor& lhs_scale,
+                       const paddle::Tensor& rhs,
+                       const paddle::Tensor& rhs_scale,
+                       const bool is_lhs_1d_scaled,
+                       const bool is_rhs_1d_scaled,
+                       paddle::Tensor& out  // NOLINT
 ) {
-  using gemm_func_t = std::function<void()>;
-  gemm_func_t gemm_func;
-
-  auto trivial_gemm_1dx1d_scaled = [&]() {
-    std::cout << "1dx1d_scaled" << std::endl;
-    return;  // not-implemented yet
-  };
-  auto trivial_gemm_1dx2d_scaled = [&]() {
-    std::cout << "1dx2d_scaled" << std::endl;
-    return;  // not-implemented yet
-  };
-  auto trivial_gemm_2dx1d_scaled = [&]() {
-    std::cout << "2dx1d_scaled" << std::endl;
-    return;  // not-implemented yet
-  };
-  auto trivial_gemm_2dx2d_scaled = [&]() {
-    std::cout << "2dx2d_scaled" << std::endl;
-    return;  // not-implemented yet
-  };
-
-  gemm_func = is_lhs_1d_scaled
-                  ? (is_rhs_1d_scaled ? (gemm_func_t)trivial_gemm_1dx1d_scaled
-                                      : (gemm_func_t)trivial_gemm_1dx2d_scaled)
-                  : (is_rhs_1d_scaled ? (gemm_func_t)trivial_gemm_2dx1d_scaled
-                                      : (gemm_func_t)trivial_gemm_2dx2d_scaled);
-  gemm_func();
   return;
 }
 
-std::vector<paddle::Tensor> trivial_gemm(const paddle::Tensor& lhs,
-                                         const paddle::Tensor& lhs_scale,
-                                         const paddle::Tensor& rhs,
-                                         const paddle::Tensor& rhs_scale,
-                                         const bool is_lhs_1d_scaled,
-                                         const bool is_rhs_1d_scaled) {
+std::vector<paddle::Tensor> fp8_gemm(const paddle::Tensor& lhs,
+                                     const paddle::Tensor& lhs_scale,
+                                     const paddle::Tensor& rhs,
+                                     const paddle::Tensor& rhs_scale,
+                                     const bool is_lhs_1d_scaled,
+                                     const bool is_rhs_1d_scaled) {
   // ----------------- Arguments check-------------------
   auto check_args = [&]() -> bool {
     // ----------- Type check ----------
@@ -215,16 +190,17 @@ std::vector<paddle::Tensor> trivial_gemm(const paddle::Tensor& lhs,
   };  // allocate_outputs
 
   auto launch = [&](auto& outputs) -> std::vector<paddle::Tensor> {
-    dispatch_trivial_gemm(lhs,
-                          lhs_scale,
-                          rhs,
-                          rhs_scale,
-                          is_lhs_1d_scaled,
-                          is_rhs_1d_scaled,
-                          outputs);
+    dispatch_fp8_gemm(lhs,
+                      lhs_scale,
+                      rhs,
+                      rhs_scale,
+                      is_lhs_1d_scaled,
+                      is_rhs_1d_scaled,
+                      outputs);
     return {outputs};
   };  // launch
 
+  // ====================== Actual execution ====================
   try {
     auto is_0size = check_args();
     auto outputs = allocate_outputs();
@@ -233,12 +209,12 @@ std::vector<paddle::Tensor> trivial_gemm(const paddle::Tensor& lhs,
     }
     return launch(outputs);
   } catch (const std::exception& e) {
-    PADDLE_THROW(common::errors::Fatal("trivial_gemm failed: %s", e.what()));
+    PADDLE_THROW(common::errors::Fatal("fp8_gemm failed: %s", e.what()));
   }  // try-catches
 }
 
-PD_BUILD_OP(trivial_gemm)
+PD_BUILD_OP(fp8_gemm)
     .Inputs({"lhs", "lhs_scale", "rhs", "rhs_scale"})
     .Outputs({"out"})
     .Attrs({"is_lhs_1d_scaled: bool", "is_rhs_1d_scaled: bool"})
-    .SetKernelFn(PD_KERNEL(trivial_gemm));
+    .SetKernelFn(PD_KERNEL(fp8_gemm));

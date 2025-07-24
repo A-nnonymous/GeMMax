@@ -36,7 +36,7 @@ def setup_gemmax():
         name="gemmax",
         ext_modules=CUDAExtension(
             sources=[
-                "csrc/trivial_gemm.cu",
+                "csrc/fp8_gemm.cu",
             ],
             extra_compile_args={
                 "cxx": ["-O3", "-w", "-Wno-abi", "-fPIC", "-std=c++17"],
