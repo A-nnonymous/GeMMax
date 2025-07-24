@@ -257,8 +257,6 @@ def test_gemm_to_csv():
         print(f"Running case: m={m}, k={k}, n={n}")
         x_fp8, y_fp8, out, ref_out = construct(m, k, n)
         deep_gemm.gemm_fp8_fp8_bf16_nt(x_fp8, y_fp8, out)
-        # diff = calc_diff(out, ref_out)
-        # assert diff < 0.001, f'{m=}, {k=}, {n=}, {diff:.5f}'
 
         def test_func():
             deep_gemm.gemm_fp8_fp8_bf16_nt(x_fp8, y_fp8, out)

@@ -1,3 +1,4 @@
+.SILENT:
 GPU_IDS := 0 1 2 3 4 5 6 7
 ENV_DIR := /root/paddlejob/workspace/env_run/panzhaowu/envs/gemm_dev
 LOG_DIR := logs
@@ -6,7 +7,6 @@ PYTHON := ${ENV_DIR}/bin/python
 DEEPGEMM_DIR := third_party/DeepGEMM_annotation
 SAMPLE_GPUID := 0
 SAMPLE_INTERVAL_MS := 50
-.SILENT:
 
 ifeq ($(DRY_RUN),true)
     RUN := echo "-- [DRY RUN]:"
@@ -87,25 +87,20 @@ run_all_benchmarks: $(LOG_DIR)
 	make run_gemmax_benchmark NUM_GPUS=4
 	wait
 
-run_stability_benchmark:
 
-nvmonitor:
-	nvidia-smi -i ${SAMPLE_GPUID} --format=csv,nounits -lms ${SAMPLE_INTERVAL_MS} \
-	--query-gpu=utilization.gpu,memory.total,memory.used,memory.free,\
-	pstate,power.limit,power.draw.instant,\
-	clocks_throttle_reasons.hw_thermal_slowdown,\
-	clocks_throttle_reasons.hw_power_brake_slowdown,\
-	clocks_throttle_reasons.sw_thermal_slowdown,\
-	clocks_throttle_reasons.sync_boost,\
-	temperature.gpu.tlimit,temperature.gpu,temperature.memory,\
-	clocks.current.graphics,clocks.current.sm,clocks.current.video,clocks.current.memory \
-	| tee nvsmi_query.csv
+run_stability:
+	${RUN} ${PYTHON} tests/benchmarks/test_deepgemm_stability.py
+
+
+run_stability_benchmark:
+	make nvmonitor & B_PID=$!; make run_stability; kill-9 $B_PID
 
 # -------------------- Unit tests -------------------
 run_deepgemm_unittest:
 	$(RUN) $(PYTHON) tests/unittests/test_core.py
+
 # -------------------- Visualize ---------------------
-# TODO: implement these
+# TODO: implement this rule
 combine_logs:
 	$(RUN) $(PYTHON) visualizations/scripts/processing_logs.py
 
@@ -113,4 +108,12 @@ visualize_csv:
 	$(RUN) $(PYTHON) visualizations/scripts/plot_gemmax.py
 	$(RUN) $(PYTHON) visualizations/scripts/plot_deepgemm.py
 
-# --------------------- Cleaning ----------------------
+# --------------------- Utilities ----------------------
+nvmonitor:
+	nvidia-smi -i ${SAMPLE_GPUID} --format=csv,nounits -lms ${SAMPLE_INTERVAL_MS} \
+	--query-gpu=utilization.gpu,memory.total,memory.used,memory.free,\
+	pstate,power.limit,power.draw.instant,\
+	clocks_throttle_reasons.supported,\
+	temperature.gpu.tlimit,temperature.gpu,temperature.memory,\
+	clocks.current.graphics,clocks.current.sm,clocks.current.video,clocks.current.memory \
+	| tee ${LOG_DIR}/nvsmi_query.csv
