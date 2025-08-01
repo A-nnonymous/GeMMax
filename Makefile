@@ -1,6 +1,6 @@
 .SILENT:
 GPU_IDS := 0 1 2 3 4 5 6 7
-ENV_DIR := /root/paddlejob/workspace/env_run/panzhaowu/envs/gemm_dev
+ENV_DIR := ../envs/gemm_dev
 LOG_DIR := logs
 DRY_RUN ?= false
 PYTHON := ${ENV_DIR}/bin/python
@@ -90,6 +90,9 @@ run_all_benchmarks: $(LOG_DIR)
 
 run_stability:
 	${RUN} ${PYTHON} tests/benchmarks/test_deepgemm_stability.py
+
+run_test:
+	${RUN} ${PYTHON} tests/benchmarks/benchmark_utils.py
 
 
 run_stability_benchmark:
