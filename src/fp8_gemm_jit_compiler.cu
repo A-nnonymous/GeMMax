@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "./fp8_gemm_jit.cuh"
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include "./fp8_gemm_jit.cuh"
 
 // Error checking macros
 #define CHECK_NVRTC(expr)                                                 \

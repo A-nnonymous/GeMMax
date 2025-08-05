@@ -5,3 +5,6 @@
 [submodule "third_party/DeepGEMM_annotation"]
 	path = third_party/DeepGEMM_annotation
 	url = https://github.com/A-nnonymous/DeepGEMM_annotation.git
+[submodule "third_party/rapidhash"]
+	path = third_party/rapidhash
+	url = https://github.com/Nicoshev/rapidhash.git
