@@ -34,4 +34,21 @@ struct alignas(16) GemmConfig {
   int ldc;      // Leading dimension of C
   float alpha;  // Scaling factor for A*B product
   float beta;   // Scaling factor for existing C values
+
+  __host__ __device__ constexpr GemmConfig(int m_,
+                                           int n_,
+                                           int k_,
+                                           int lda_,
+                                           int ldb_,
+                                           int ldc_,
+                                           float alpha_,
+                                           float beta_)
+      : m(m_),
+        n(n_),
+        k(k_),
+        lda(lda_),
+        ldb(ldb_),
+        ldc(ldc_),
+        alpha(alpha_),
+        beta(beta_) {}
 };

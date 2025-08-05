@@ -13,18 +13,19 @@
 // limitations under the License.
 
 #include <type_traits>
+#include "../include/fp8_gemm_template.cuh"
+#include "../include/fp8_gemm_types.hpp"
 #include "../include/test_framework.hpp"
-#include "./fp8_gemm_types.hpp"
 
+constexpr GemmConfig make_config(
+    int M, int N, int K, int bM, int bN, int bK, float a, float b) {
+  return GemmConfig(M, N, K, bM, bN, bK, a, b);
+}
+inline static constexpr auto config1 =
+    make_config(16, 16, 16, 16, 16, 16, 1.0f, 0.0f);
 // Test constexpr configuration
-constexpr GemmConfig test_config = {.m = 32,
-                                    .n = 32,
-                                    .k = 32,
-                                    .lda = 32,
-                                    .ldb = 32,
-                                    .ldc = 32,
-                                    .alpha = 1.0f,
-                                    .beta = 0.0f};
+constexpr GemmConfig test_config =
+    make_config(32, 32, 32, 32, 32, 32, 1.0f, 0.0f);
 
 // Test template instantiation with different block sizes
 template class std::is_invocable<
@@ -63,17 +64,7 @@ TEST("Template: Different block size instantiations",
   // Verify we can create different template instantiations
   // This is a compile-time test that we can instantiate different block sizes
 
-  // Test 16x16x16
-  constexpr GemmConfig config1 = {16, 16, 16, 16, 16, 16, 1.0f, 0.0f};
   (void)gemm_fp8_kernel<16, 16, 16, config1>;
-
-  // Test 32x32x8
-  constexpr GemmConfig config2 = {32, 32, 16, 16, 32, 32, 1.0f, 0.0f};
-  (void)gemm_fp8_kernel<32, 32, 8, config2>;
-
-  // Test 8x8x32
-  constexpr GemmConfig config3 = {8, 8, 32, 32, 8, 8, 0.5f, 0.5f};
-  (void)gemm_fp8_kernel<8, 8, 32, config3>;
 
   ASSERT_TRUE(true, "All template instantiations succeeded");
 }

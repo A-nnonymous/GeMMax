@@ -16,26 +16,28 @@
 #define FP8_GEMM_TP
 
 #include <cuda.h>
+#include <cuda_bf16.h>
 #include <cuda_fp16.h>
 #include <cuda_fp8.h>
+#include <cuda_runtime.h>
 #include <cstdint>
 #include "fp8_gemm_types.hpp"
 
 // H100 native FP8 type (E4M3 format with IEEE 754-style NaNs and infs)
-using fp8_e4m3fn = __nv_fp8_e4m3fn;
+using fp8_e4m3fn = __nv_fp8_e4m3;
 
 /**
  * @brief Converts float to fp8_e4m3fn
  */
 __host__ __device__ inline fp8_e4m3fn float_to_fp8(float value) {
-  return __float2nv_fp8_e4m3fn(value);
+  return static_cast<fp8_e4m3fn>(value);
 }
 
 /**
  * @brief Converts fp8_e4m3fn to float
  */
 __host__ __device__ inline float fp8_to_float(fp8_e4m3fn value) {
-  return __nv_fp8_e4m3fn2float(value);
+  return float(value);
 }
 
 /**
